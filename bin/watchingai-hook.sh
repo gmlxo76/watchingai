@@ -93,7 +93,7 @@ case "$HOOK_EVENT" in
         esac
         ;;
     PostToolUse)
-        write_status "working" "작업 중"
+        write_status "done" "완료"
         ;;
     PostToolUseFailure)
         log_action "error"

@@ -53,6 +53,8 @@ class WatchingAIApp:
         self._tray.test_state_changed.connect(self._on_test_state)
         self._tray.quit_requested.connect(self._on_quit)
 
+        self._done_since = None
+
         self._status_timer = QTimer()
         self._status_timer.timeout.connect(self._poll_status)
         self._status_timer.start(self._config.poll_interval_ms)
@@ -100,6 +102,21 @@ class WatchingAIApp:
 
     def _poll_status(self) -> None:
         status = self._status_reader.read()
+
+        if status.state == "done":
+            if self._done_since is None:
+                self._done_since = datetime.now(timezone.utc)
+            elapsed = (datetime.now(timezone.utc) - self._done_since).total_seconds()
+            if elapsed >= 5:
+                self._done_since = None
+                idle_status = Status(state="idle", detail=status.detail, elapsed_seconds=0)
+                self._current_status = idle_status
+                self._update_animation(idle_status)
+                self._update_tooltip(idle_status)
+                return
+        else:
+            self._done_since = None
+
         if status != self._current_status:
             self._current_status = status
             self._update_animation(status)
