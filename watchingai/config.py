@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 DEFAULT_ANIMATIONS = {
-    "idle": {"row": 1, "columns": [1, 2, 3]},
-    "thinking": {"row": 3, "columns": [1, 2]},
+    "idle": {"row": 9, "columns": [1, 2, 3, 4]},
+    "thinking": {"row": 3, "columns": [1, 2, 3, 4]},
     "working": {"row": 4, "columns": [1, 2, 3, 4]},
-    "done": {"row": 6, "columns": [2, 4]},
-    "error": {"row": 8, "columns": [1, 2, 3]},
+    "done": {"row": 5, "columns": [1, 2, 3, 4]},
+    "error": {"row": 7, "columns": [1, 2, 3, 4]},
 }
 
 DEFAULT_CONFIG = {
@@ -16,11 +16,11 @@ DEFAULT_CONFIG = {
     },
     "sprite": {
         "sheet": "default_sprite.png",
-        "frame_width": 64,
-        "frame_height": 64,
+        "rows": 9,
+        "cols": 4,
         "animations": DEFAULT_ANIMATIONS,
     },
-    "size": 64,
+    "size": 128,
     "poll_interval_ms": 1500,
 }
 
@@ -80,12 +80,12 @@ class Config:
         self._data["sprite"]["sheet"] = value
 
     @property
-    def frame_width(self) -> int:
-        return self._data["sprite"]["frame_width"]
+    def sprite_rows(self) -> int:
+        return self._data["sprite"].get("rows", 0)
 
     @property
-    def frame_height(self) -> int:
-        return self._data["sprite"]["frame_height"]
+    def sprite_cols(self) -> int:
+        return self._data["sprite"].get("cols", 0)
 
     @property
     def animations(self) -> dict:

@@ -60,8 +60,8 @@ class WatchingAIApp:
             else:
                 path = Path(__file__).parent.parent / "assets" / sheet_path
         return SpriteSheet(path,
-                           self._config.frame_width,
-                           self._config.frame_height)
+                           rows=self._config.sprite_rows,
+                           cols=self._config.sprite_cols)
 
     def _apply_position(self) -> None:
         custom = self._config.custom_position
@@ -115,9 +115,7 @@ class WatchingAIApp:
         self._widget.show()
 
     def _on_sprite_changed(self, path: str) -> None:
-        self._sprite_sheet = SpriteSheet(
-            Path(path), self._config.frame_width, self._config.frame_height
-        )
+        self._sprite_sheet = SpriteSheet(Path(path))
         self._update_animation(self._current_status)
 
     def _on_quit(self) -> None:

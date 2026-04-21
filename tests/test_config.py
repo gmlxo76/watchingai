@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 
@@ -7,9 +6,9 @@ def test_default_config_created(tmp_path):
     config = Config(config_dir=tmp_path)
     assert config.position_preset == "bottom-right"
     assert config.sprite_sheet == "default_sprite.png"
-    assert config.frame_width == 64
-    assert config.frame_height == 64
-    assert config.size == 64
+    assert config.sprite_rows == 9
+    assert config.sprite_cols == 4
+    assert config.size == 128
     assert config.poll_interval_ms == 1500
     assert "idle" in config.animations
     assert "working" in config.animations
