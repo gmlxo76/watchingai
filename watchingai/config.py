@@ -21,12 +21,16 @@ DEFAULT_CONFIG = {
 
 
 class Config:
-    def __init__(self, config_dir: Path | None = None):
+    def __init__(self, config_dir: Path | None = None, project_id: str | None = None):
         if config_dir is None:
             config_dir = Path.home() / ".watchingai"
         self._config_dir = config_dir
         self._config_dir.mkdir(parents=True, exist_ok=True)
-        self._config_file = self._config_dir / "config.json"
+        self._project_id = project_id
+        if project_id:
+            self._config_file = self._config_dir / f"config_{project_id}.json"
+        else:
+            self._config_file = self._config_dir / "config.json"
         self._data = self._load()
 
     def _load(self) -> dict:
@@ -96,4 +100,6 @@ class Config:
 
     @property
     def frames_dir(self) -> Path:
+        if self._project_id:
+            return self._config_dir / f"frames_{self._project_id}"
         return self._config_dir / "frames"

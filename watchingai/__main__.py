@@ -1,3 +1,4 @@
+import argparse
 import json
 import sys
 from datetime import datetime, timezone
@@ -24,9 +25,13 @@ STATE_LABELS = {
 
 
 class WatchingAIApp:
-    def __init__(self):
-        self._config = Config()
-        self._status_reader = StatusReader(status_dir=self._config.config_dir)
+    def __init__(self, project_id: str | None = None):
+        self._project_id = project_id
+        self._config = Config(project_id=project_id)
+        self._status_reader = StatusReader(
+            status_dir=self._config.config_dir,
+            project_id=project_id,
+        )
         self._assets_dir = Path(__file__).parent / "assets"
         self._frame_loader = FrameLoader(
             frames_dir=self._config.frames_dir,
@@ -58,6 +63,21 @@ class WatchingAIApp:
         self._update_animation(IDLE)
         self._widget.show()
         self._tray.show()
+        self._write_pid()
+
+    def _pid_file(self) -> Path:
+        name = f"pid_{self._project_id}.txt" if self._project_id else "pid.txt"
+        return self._config.config_dir / name
+
+    def _write_pid(self) -> None:
+        import os
+        self._pid_file().write_text(str(os.getpid()), encoding="utf-8")
+
+    def _remove_pid(self) -> None:
+        try:
+            self._pid_file().unlink()
+        except FileNotFoundError:
+            pass
 
     def _apply_position(self) -> None:
         custom = self._config.custom_position
@@ -133,13 +153,18 @@ class WatchingAIApp:
         custom_pos = self._widget.pos()
         self._config.custom_position = (custom_pos.x(), custom_pos.y())
         self._config.save()
+        self._remove_pid()
         QApplication.quit()
 
 
 def main():
-    app = QApplication(sys.argv)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--project-id", default=None)
+    args, remaining = parser.parse_known_args()
+
+    app = QApplication(remaining)
     app.setQuitOnLastWindowClosed(False)
-    _wai = WatchingAIApp()
+    _wai = WatchingAIApp(project_id=args.project_id)
     return app.exec()
 
 

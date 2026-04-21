@@ -1,7 +1,13 @@
 #!/bin/bash
 WATCHINGAI_DIR="$HOME/.watchingai"
-STATUS_FILE="$WATCHINGAI_DIR/status.json"
 mkdir -p "$WATCHINGAI_DIR"
+
+PROJECT_ID=$(echo "$PWD" | md5sum | cut -c1-8)
+STATUS_FILE="$WATCHINGAI_DIR/status_${PROJECT_ID}.json"
+SESSION_LOG="$WATCHINGAI_DIR/session_log_${PROJECT_ID}.txt"
+
+# 현재 프로젝트 경로 기록 (앱에서 참조)
+echo "$PWD" > "$WATCHINGAI_DIR/project_${PROJECT_ID}.path"
 
 INPUT=$(cat)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S")
@@ -12,7 +18,6 @@ get_val() {
 
 HOOK_EVENT=$(get_val "hook_event_name")
 TOOL_NAME=$(get_val "tool_name")
-SESSION_LOG="$WATCHINGAI_DIR/session_log.txt"
 
 write_status() {
     cat > "$STATUS_FILE" << EOF
