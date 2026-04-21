@@ -62,6 +62,12 @@ case "$HOOK_EVENT" in
         write_status "idle" "[세션종료] $SUMMARY"
         ;;
     SessionEnd)
+        rm -f "$SESSION_LOG"
+        PID_FILE="$WATCHINGAI_DIR/pid_${PROJECT_ID}.txt"
+        if [ -f "$PID_FILE" ]; then
+            kill $(cat "$PID_FILE") 2>/dev/null
+            rm -f "$PID_FILE"
+        fi
         write_status "idle" ""
         ;;
     UserPromptSubmit)
@@ -83,7 +89,7 @@ case "$HOOK_EVENT" in
         esac
         ;;
     PostToolUse)
-        write_status "thinking" "처리 중..."
+        write_status "working" "작업 중"
         ;;
     PostToolUseFailure)
         log_action "error"

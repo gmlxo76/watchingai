@@ -155,7 +155,10 @@ class WatchingAIApp:
         self._update_animation(self._current_status)
 
     def _on_test_state(self, state: str) -> None:
-        status_file = self._config.config_dir / "status.json"
+        if self._project_id:
+            status_file = self._config.config_dir / f"status_{self._project_id}.json"
+        else:
+            status_file = self._config.config_dir / "status.json"
         data = {
             "status": state,
             "detail": f"테스트: {STATE_LABELS.get(state, state)}",
