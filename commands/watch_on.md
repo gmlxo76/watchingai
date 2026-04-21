@@ -17,5 +17,7 @@ if [ -f "$PID_FILE" ]; then
     rm -f "$PID_FILE"
 fi
 PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" nohup python3 -m watchingai --project-id "$PROJECT_ID" >/dev/null 2>&1 &
+disown
+sleep 1
 echo "🐱 ON"
 ```
