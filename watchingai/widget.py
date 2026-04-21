@@ -57,6 +57,60 @@ class TooltipWindow(QWidget):
         self.show()
 
 
+class BubbleWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.Tool
+            | Qt.WindowType.BypassWindowManagerHint
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+
+        self._label = QLabel(self)
+        self._label.setStyleSheet(
+            "background-color: white;"
+            "color: #333;"
+            "padding: 8px 12px;"
+            "border-radius: 10px;"
+            "border: 2px solid #ccc;"
+            "font-size: 12px;"
+        )
+        self._label.setFont(QFont("맑은 고딕", 9))
+        self._label.setWordWrap(True)
+        self._label.setMaximumWidth(250)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._label)
+
+        self._hide_timer = QTimer(self)
+        self._hide_timer.setSingleShot(True)
+        self._hide_timer.timeout.connect(self.hide)
+
+    def show_message(self, text: str, widget_pos: QPoint, widget_w: int, duration_ms: int = 5000) -> None:
+        self._label.setText(text)
+        self._label.adjustSize()
+        self.adjustSize()
+        x = widget_pos.x() + widget_w + 8
+        y = widget_pos.y()
+        screen = QGuiApplication.primaryScreen()
+        if screen:
+            geo = screen.availableGeometry()
+            if x + self.width() > geo.x() + geo.width():
+                x = widget_pos.x() - self.width() - 8
+            if y < geo.y():
+                y = geo.y() + 4
+            if y + self.height() > geo.y() + geo.height():
+                y = geo.y() + geo.height() - self.height() - 4
+        self.move(x, y)
+        self.show()
+        if duration_ms > 0:
+            self._hide_timer.start(duration_ms)
+
+
 class SpriteWidget(QWidget):
     def __init__(self, ratio: float = 1.0):
         super().__init__()
@@ -84,6 +138,18 @@ class SpriteWidget(QWidget):
         layout.addWidget(self._label)
 
         self._tooltip_win = TooltipWindow()
+        self._bubble_win = BubbleWindow()
+
+    def show_bubble(self, text: str, duration_ms: int = 5000) -> None:
+        self._bubble_win.show_message(text, self.pos(), self._display_w, duration_ms)
+
+    def _update_bubble_pos(self) -> None:
+        if self._bubble_win.isVisible():
+            self._bubble_win.show_message(
+                self._bubble_win._label.text(),
+                self.pos(), self._display_w,
+                0,
+            )
 
     def update_sprite(self, pixmap: QPixmap) -> None:
         self._display_w = max(1, int(pixmap.width() * self._ratio))
@@ -136,10 +202,12 @@ class SpriteWidget(QWidget):
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:
             self.move(event.globalPosition().toPoint() - self._drag_pos)
+            self._update_bubble_pos()
             event.accept()
         if self._hovering and self._tooltip_text:
             self._tooltip_win.show_at_cursor(event.globalPosition().toPoint())
 
     def closeEvent(self, event):
         self._tooltip_win.close()
+        self._bubble_win.close()
         super().closeEvent(event)

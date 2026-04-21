@@ -71,6 +71,9 @@ class WatchingAIApp:
         if status != self._current_status:
             self._current_status = status
             self._update_animation(status)
+            if status.detail and status.detail.startswith("[세션종료]"):
+                msg = status.detail.replace("[세션종료] ", "")
+                self._widget.show_bubble(msg, 8000)
         self._update_tooltip(status)
 
     def _update_animation(self, status: Status) -> None:
