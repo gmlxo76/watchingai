@@ -75,9 +75,14 @@ class FramePickerDialog(QDialog):
 
         layout.addLayout(mid)
 
-        save_btn = QPushButton("저장")
+        btn_row = QHBoxLayout()
+        save_btn = QPushButton("전체 저장")
         save_btn.clicked.connect(self._save_and_close)
-        layout.addWidget(save_btn)
+        btn_row.addWidget(save_btn)
+        close_btn = QPushButton("닫기")
+        close_btn.clicked.connect(self.accept)
+        btn_row.addWidget(close_btn)
+        layout.addLayout(btn_row)
 
         self._load_available_frames()
         self._on_state_changed()
@@ -102,8 +107,19 @@ class FramePickerDialog(QDialog):
             item.setData(Qt.ItemDataRole.UserRole, f.name)
             self._available_list.addItem(item)
 
+    def _save_current_state(self) -> None:
+        if not hasattr(self, '_prev_state'):
+            return
+        frames = []
+        for i in range(self._selected_list.count()):
+            item = self._selected_list.item(i)
+            frames.append(item.data(Qt.ItemDataRole.UserRole))
+        self._config.animations[self._prev_state] = frames
+
     def _on_state_changed(self) -> None:
+        self._save_current_state()
         state = self._state_combo.currentData()
+        self._prev_state = state
         self._selected_list.clear()
         current_frames = self._config.animations.get(state, [])
         for name in current_frames:
@@ -157,26 +173,27 @@ class FramePickerDialog(QDialog):
             self._selected_list.setCurrentRow(row + 1)
 
     def _save_and_close(self) -> None:
-        state = self._state_combo.currentData()
-        frames = []
-        for i in range(self._selected_list.count()):
-            item = self._selected_list.item(i)
-            frames.append(item.data(Qt.ItemDataRole.UserRole))
-        self._config.animations[state] = frames
+        self._save_current_state()
         self._config.save()
-        self.accept()
 
 
 class TrayIcon(QSystemTrayIcon):
     position_changed = pyqtSignal(str)
-    size_changed = pyqtSignal(int)
+    size_changed = pyqtSignal(float)
     frames_changed = pyqtSignal()
+    test_state_changed = pyqtSignal(str)
     quit_requested = pyqtSignal()
 
     def __init__(self, config: Config):
-        icon = QPixmap(16, 16)
-        icon.fill()
-        super().__init__(QIcon(icon))
+        icon_path = Path(__file__).parent.parent / "icon" / "icon.jpg"
+        if icon_path.exists():
+            icon = QIcon(QPixmap(str(icon_path)))
+        else:
+            px = QPixmap(16, 16)
+            px.fill()
+            icon = QIcon(px)
+        super().__init__(icon)
+        self.setToolTip("WatchingAI")
         self._config = config
         self._build_menu()
 
@@ -196,12 +213,20 @@ class TrayIcon(QSystemTrayIcon):
             action.triggered.connect(lambda checked, k=key: self._on_position(k))
 
         size_menu = menu.addMenu("크기 (Size)")
-        for s in [32, 48, 64, 96, 128]:
-            action = size_menu.addAction(f"{s}x{s}")
-            action.triggered.connect(lambda checked, sz=s: self._on_size(sz))
+        for ratio in [0.5, 0.75, 1.0, 1.5, 2.0, 3.0]:
+            label = f"{int(ratio * 100)}%"
+            action = size_menu.addAction(label)
+            action.triggered.connect(lambda checked, r=ratio: self._on_size_ratio(r))
 
         frame_action = menu.addAction("프레임 설정 (Frame Settings)")
         frame_action.triggered.connect(self._on_frame_settings)
+
+        menu.addSeparator()
+
+        test_menu = menu.addMenu("상태 테스트 (Test State)")
+        for key, label in STATE_NAMES.items():
+            action = test_menu.addAction(label)
+            action.triggered.connect(lambda checked, k=key: self._on_test_state(k))
 
         menu.addSeparator()
 
@@ -216,10 +241,10 @@ class TrayIcon(QSystemTrayIcon):
         self._config.save()
         self.position_changed.emit(preset)
 
-    def _on_size(self, size: int) -> None:
-        self._config.size = size
+    def _on_size_ratio(self, ratio: float) -> None:
+        self._config.size_ratio = ratio
         self._config.save()
-        self.size_changed.emit(size)
+        self.size_changed.emit(ratio)
 
     def _on_frame_settings(self) -> None:
         assets_dir = Path(__file__).parent.parent / "assets"
@@ -230,6 +255,9 @@ class TrayIcon(QSystemTrayIcon):
         )
         if dialog.exec():
             self.frames_changed.emit()
+
+    def _on_test_state(self, state: str) -> None:
+        self.test_state_changed.emit(state)
 
     def _on_quit(self) -> None:
         self.quit_requested.emit()

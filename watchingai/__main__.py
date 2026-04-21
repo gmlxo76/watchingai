@@ -1,4 +1,6 @@
+import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
@@ -30,7 +32,7 @@ class WatchingAIApp:
             frames_dir=self._config.frames_dir,
             assets_dir=self._assets_dir,
         )
-        self._widget = SpriteWidget(size=self._config.size)
+        self._widget = SpriteWidget(ratio=self._config.size_ratio)
         self._tray = TrayIcon(self._config)
         self._current_status = IDLE
         self._frame_index = 0
@@ -41,6 +43,7 @@ class WatchingAIApp:
         self._tray.position_changed.connect(self._on_position_changed)
         self._tray.size_changed.connect(self._on_size_changed)
         self._tray.frames_changed.connect(self._on_frames_changed)
+        self._tray.test_state_changed.connect(self._on_test_state)
         self._tray.quit_requested.connect(self._on_quit)
 
         self._status_timer = QTimer()
@@ -97,15 +100,31 @@ class WatchingAIApp:
     def _on_position_changed(self, preset: str) -> None:
         self._widget.set_position_preset(preset)
 
-    def _on_size_changed(self, size: int) -> None:
+    def _on_size_changed(self, ratio: float) -> None:
         self._widget.close()
-        self._widget = SpriteWidget(size=size)
+        self._widget = SpriteWidget(ratio=ratio)
         self._apply_position()
         self._update_animation(self._current_status)
         self._widget.show()
 
     def _on_frames_changed(self) -> None:
         self._update_animation(self._current_status)
+
+    def _on_test_state(self, state: str) -> None:
+        status_file = self._config.config_dir / "status.json"
+        data = {
+            "status": state,
+            "detail": f"테스트: {STATE_LABELS.get(state, state)}",
+            "elapsed_seconds": 0,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        status_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(status_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        test_status = Status(state=state, detail=data["detail"], elapsed_seconds=0)
+        self._current_status = test_status
+        self._update_animation(test_status)
+        self._update_tooltip(test_status)
 
     def _on_quit(self) -> None:
         custom_pos = self._widget.pos()

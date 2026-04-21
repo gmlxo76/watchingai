@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 DEFAULT_ANIMATIONS = {
-    "idle": ["frame_29.png", "frame_30.png", "frame_31.png", "frame_32.png"],
-    "thinking": ["frame_09.png", "frame_10.png", "frame_11.png", "frame_12.png"],
-    "working": ["frame_13.png", "frame_14.png", "frame_15.png", "frame_16.png"],
-    "done": ["frame_17.png", "frame_18.png", "frame_19.png", "frame_20.png"],
-    "error": ["frame_25.png", "frame_26.png", "frame_27.png", "frame_28.png"],
+    "idle": ["frame_01.png", "frame_02.png", "frame_03.png", "frame_04.png"],
+    "thinking": ["frame_06.png", "frame_07.png", "frame_08.png", "frame_09.png", "frame_10.png"],
+    "working": ["frame_11.png", "frame_12.png"],
+    "done": ["frame_01.png", "frame_02.png", "frame_03.png", "frame_04.png", "frame_05.png"],
+    "error": ["frame_01.png", "frame_02.png", "frame_03.png", "frame_04.png", "frame_05.png"],
 }
 
 DEFAULT_CONFIG = {
@@ -15,7 +15,7 @@ DEFAULT_CONFIG = {
         "custom": None,
     },
     "animations": DEFAULT_ANIMATIONS,
-    "size": 128,
+    "size_ratio": 0.5,
     "poll_interval_ms": 1500,
 }
 
@@ -72,11 +72,19 @@ class Config:
 
     @property
     def size(self) -> int:
-        return self._data["size"]
+        return self._data.get("size", 128)
 
     @size.setter
     def size(self, value: int) -> None:
         self._data["size"] = value
+
+    @property
+    def size_ratio(self) -> float:
+        return self._data.get("size_ratio", 1.0)
+
+    @size_ratio.setter
+    def size_ratio(self, value: float) -> None:
+        self._data["size_ratio"] = value
 
     @property
     def poll_interval_ms(self) -> int:
