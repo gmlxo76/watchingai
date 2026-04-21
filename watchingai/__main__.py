@@ -101,6 +101,15 @@ class WatchingAIApp:
         frame_files = self._config.animations.get(state)
         if not frame_files:
             frame_files = self._config.animations.get("idle", [])
+
+        if len(frame_files) == 1 and frame_files[0].lower().endswith(".gif"):
+            gif_path = self._frame_loader.resolve_path(frame_files[0])
+            if gif_path.exists():
+                self._current_frames = []
+                self._widget.play_gif(str(gif_path))
+                return
+
+        self._widget.stop_gif()
         self._current_frames = self._frame_loader.load_frames(frame_files)
         self._frame_index = 0
         if self._current_frames:

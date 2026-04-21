@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
-from PyQt6.QtCore import Qt, QPoint, QTimer
-from PyQt6.QtGui import QCursor, QPixmap, QGuiApplication, QFont
+from PyQt6.QtCore import Qt, QPoint, QTimer, QSize
+from PyQt6.QtGui import QCursor, QPixmap, QGuiApplication, QFont, QMovie
 
 
 POSITION_PRESETS = {
@@ -137,8 +137,34 @@ class SpriteWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._label)
 
+        self._movie = None
         self._tooltip_win = TooltipWindow()
         self._bubble_win = BubbleWindow()
+
+    def play_gif(self, path: str) -> None:
+        if self._movie:
+            self._movie.stop()
+        self._movie = QMovie(path)
+        if not self._movie.isValid():
+            self._movie = None
+            return
+        self._label.setScaledContents(True)
+        orig = self._movie.scaledSize()
+        if orig.isEmpty():
+            self._movie.jumpToFrame(0)
+            orig = self._movie.currentPixmap().size()
+        self._display_w = max(1, int(orig.width() * self._ratio))
+        self._display_h = max(1, int(orig.height() * self._ratio))
+        self._movie.setScaledSize(QSize(self._display_w, self._display_h))
+        self._label.setFixedSize(self._display_w, self._display_h)
+        self.setFixedSize(self._display_w, self._display_h)
+        self._label.setMovie(self._movie)
+        self._movie.start()
+
+    def stop_gif(self) -> None:
+        if self._movie:
+            self._movie.stop()
+            self._movie = None
 
     def show_bubble(self, text: str, duration_ms: int = 5000) -> None:
         self._bubble_win.show_message(text, self.pos(), self._display_w, duration_ms)
