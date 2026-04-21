@@ -27,7 +27,7 @@ class WatchingAIApp:
     def __init__(self):
         self._config = Config()
         self._status_reader = StatusReader(status_dir=self._config.config_dir)
-        self._assets_dir = Path(__file__).parent.parent / "assets"
+        self._assets_dir = Path(__file__).parent / "assets"
         self._frame_loader = FrameLoader(
             frames_dir=self._config.frames_dir,
             assets_dir=self._assets_dir,

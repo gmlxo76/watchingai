@@ -185,7 +185,7 @@ class TrayIcon(QSystemTrayIcon):
     quit_requested = pyqtSignal()
 
     def __init__(self, config: Config):
-        icon_path = Path(__file__).parent.parent / "icon" / "icon.jpg"
+        icon_path = Path(__file__).parent / "icon" / "icon.jpg"
         if icon_path.exists():
             icon = QIcon(QPixmap(str(icon_path)))
         else:
@@ -247,7 +247,7 @@ class TrayIcon(QSystemTrayIcon):
         self.size_changed.emit(ratio)
 
     def _on_frame_settings(self) -> None:
-        assets_dir = Path(__file__).parent.parent / "assets"
+        assets_dir = Path(__file__).parent / "assets"
         dialog = FramePickerDialog(
             self._config,
             frames_dir=self._config.frames_dir,

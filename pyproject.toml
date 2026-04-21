@@ -1,15 +1,24 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "watchingai"
 version = "0.1.0"
 description = "Desktop sprite widget that shows Claude Code's working status"
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.9"
+authors = [
+    {name = "gmlxo76"},
+]
 dependencies = [
     "PyQt6>=6.5.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/gmlxo76/watchingai"
+Repository = "https://github.com/gmlxo76/watchingai"
 
 [project.scripts]
 watchingai = "watchingai.__main__:main"
@@ -18,7 +27,7 @@ watchingai = "watchingai.__main__:main"
 include = ["watchingai*"]
 
 [tool.setuptools.package-data]
-watchingai = ["../assets/*"]
+watchingai = ["assets/*", "icon/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
