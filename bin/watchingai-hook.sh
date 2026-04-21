@@ -2,7 +2,11 @@
 WATCHINGAI_DIR="$HOME/.watchingai"
 mkdir -p "$WATCHINGAI_DIR"
 
-PROJECT_ID=$(echo "$PWD" | md5sum | cut -c1-8)
+if command -v md5sum >/dev/null 2>&1; then
+    PROJECT_ID=$(echo "$PWD" | md5sum | cut -c1-8)
+else
+    PROJECT_ID=$(echo "$PWD" | md5 | cut -c1-8)
+fi
 STATUS_FILE="$WATCHINGAI_DIR/status_${PROJECT_ID}.json"
 SESSION_LOG="$WATCHINGAI_DIR/session_log_${PROJECT_ID}.txt"
 

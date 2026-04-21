@@ -1,3 +1,5 @@
+import sys
+
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PyQt6.QtCore import Qt, QPoint, QTimer, QSize
 from PyQt6.QtGui import QCursor, QPixmap, QGuiApplication, QFont, QMovie
@@ -121,12 +123,15 @@ class SpriteWidget(QWidget):
         self._hovering = False
         self._tooltip_text = ""
 
-        self.setWindowFlags(
+        flags = (
             Qt.WindowType.FramelessWindowHint
             | Qt.WindowType.WindowStaysOnTopHint
             | Qt.WindowType.Tool
         )
+        self.setWindowFlags(flags)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        if sys.platform == "darwin":
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
         self.setMouseTracking(True)
 
         self._label = QLabel(self)

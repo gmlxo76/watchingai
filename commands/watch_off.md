@@ -2,7 +2,11 @@
 
 프로젝트 ID로 해당 프로세스를 찾아서 종료:
 ```bash
-PROJECT_ID=$(echo "$PWD" | md5sum | cut -c1-8)
+if command -v md5sum >/dev/null 2>&1; then
+    PROJECT_ID=$(echo "$PWD" | md5sum | cut -c1-8)
+else
+    PROJECT_ID=$(echo "$PWD" | md5 | cut -c1-8)
+fi
 PID_FILE="$HOME/.watchingai/pid_${PROJECT_ID}.txt"
 ```
 

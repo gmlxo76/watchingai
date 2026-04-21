@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,8 +38,9 @@ class WatchingAIApp:
             frames_dir=self._config.frames_dir,
             assets_dir=self._assets_dir,
         )
+        self._project_name = self._read_project_name()
         self._widget = SpriteWidget(ratio=self._config.size_ratio)
-        self._tray = TrayIcon(self._config)
+        self._tray = TrayIcon(self._config, project_name=self._project_name)
         self._current_status = IDLE
         self._frame_index = 0
         self._current_frames: list[QPixmap] = []
@@ -64,6 +66,16 @@ class WatchingAIApp:
         self._widget.show()
         self._tray.show()
         self._write_pid()
+
+    def _read_project_name(self) -> str:
+        if not self._project_id:
+            return ""
+        path_file = self._config.config_dir / f"project_{self._project_id}.path"
+        try:
+            project_path = path_file.read_text(encoding="utf-8").strip()
+            return Path(project_path).name
+        except (FileNotFoundError, OSError):
+            return ""
 
     def _pid_file(self) -> Path:
         name = f"pid_{self._project_id}.txt" if self._project_id else "pid.txt"
@@ -170,6 +182,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-id", default=None)
     args, remaining = parser.parse_known_args()
+
+    if sys.platform == "darwin":
+        os.environ.setdefault("QT_MAC_WANTS_LAYER", "1")
 
     app = QApplication(remaining)
     app.setQuitOnLastWindowClosed(False)

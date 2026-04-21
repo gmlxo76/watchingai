@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QLabel, QListWidget, QPushButton, QListWidgetItem, QComboBox,
     QFileDialog, QApplication,
 )
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtGui import QIcon, QPixmap, QMovie
 from PyQt6.QtCore import pyqtSignal, Qt
 
 from watchingai.config import Config
@@ -100,7 +100,7 @@ class FramePickerDialog(QDialog):
         for d in [self._frames_dir, self._assets_dir]:
             if d and d.exists():
                 for f in sorted(d.iterdir()):
-                    if f.suffix.lower() in (".png", ".jpg", ".bmp"):
+                    if f.suffix.lower() in (".png", ".jpg", ".bmp", ".gif"):
                         if not any(ef.name == f.name for ef in files):
                             files.append(f)
         return sorted(files, key=lambda p: p.name)
@@ -109,9 +109,9 @@ class FramePickerDialog(QDialog):
         self._available_list.clear()
         for f in self._get_all_frame_files():
             item = QListWidgetItem(f.name)
-            pixmap = QPixmap(str(f))
-            if not pixmap.isNull():
-                item.setIcon(QIcon(pixmap))
+            icon = self._icon_for_frame(f)
+            if icon:
+                item.setIcon(icon)
             item.setData(Qt.ItemDataRole.UserRole, f.name)
             self._available_list.addItem(item)
 
@@ -124,6 +124,18 @@ class FramePickerDialog(QDialog):
             frames.append(item.data(Qt.ItemDataRole.UserRole))
         self._config.animations[self._prev_state] = frames
 
+    def _icon_for_frame(self, path: Path) -> QIcon | None:
+        if path.suffix.lower() == ".gif":
+            movie = QMovie(str(path))
+            if movie.isValid():
+                movie.jumpToFrame(0)
+                return QIcon(movie.currentPixmap())
+        else:
+            pixmap = QPixmap(str(path))
+            if not pixmap.isNull():
+                return QIcon(pixmap)
+        return None
+
     def _on_state_changed(self) -> None:
         self._save_current_state()
         state = self._state_combo.currentData()
@@ -134,9 +146,9 @@ class FramePickerDialog(QDialog):
             item = QListWidgetItem(name)
             path = self._resolve_frame(name)
             if path and path.exists():
-                pixmap = QPixmap(str(path))
-                if not pixmap.isNull():
-                    item.setIcon(QIcon(pixmap))
+                icon = self._icon_for_frame(path)
+                if icon:
+                    item.setIcon(icon)
             item.setData(Qt.ItemDataRole.UserRole, name)
             self._selected_list.addItem(item)
 
@@ -181,9 +193,9 @@ class FramePickerDialog(QDialog):
             new_item = QListWidgetItem(name)
             path = self._resolve_frame(name)
             if path and path.exists():
-                pixmap = QPixmap(str(path))
-                if not pixmap.isNull():
-                    new_item.setIcon(QIcon(pixmap))
+                icon = self._icon_for_frame(path)
+                if icon:
+                    new_item.setIcon(icon)
             new_item.setData(Qt.ItemDataRole.UserRole, name)
             self._selected_list.addItem(new_item)
 
@@ -218,7 +230,7 @@ class TrayIcon(QSystemTrayIcon):
     test_state_changed = pyqtSignal(str)
     quit_requested = pyqtSignal()
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, project_name: str = ""):
         icon_path = Path(__file__).parent / "icon" / "icon.jpg"
         if icon_path.exists():
             icon = QIcon(QPixmap(str(icon_path)))
@@ -227,7 +239,8 @@ class TrayIcon(QSystemTrayIcon):
             px.fill()
             icon = QIcon(px)
         super().__init__(icon)
-        self.setToolTip("WatchingAI")
+        tooltip = f"WatchingAI - {project_name}" if project_name else "WatchingAI"
+        self.setToolTip(tooltip)
         self._config = config
         self._build_menu()
 
