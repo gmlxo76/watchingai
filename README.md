@@ -17,8 +17,13 @@ Claude Code의 작업 상태를 데스크톱 위에 스프라이트 캐릭터로
 
 ### Claude Code 플러그인으로 설치 (권장)
 
+**1단계:** 마켓플레이스 등록 (최초 1회)
 ```
 /plugin marketplace add gmlxo76/watchingai
+```
+
+**2단계:** 플러그인 설치
+```
 /plugin install watchingai@watchingai
 ```
 
