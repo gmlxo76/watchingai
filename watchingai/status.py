@@ -22,7 +22,9 @@ IDLE = Status(state="idle", detail="", elapsed_seconds=0)
 
 
 class StatusReader:
-    def __init__(self, status_dir: Path | None = None, stale_seconds: int = 120,
+    ACTIVE_STATES = {"thinking", "working"}
+
+    def __init__(self, status_dir: Path | None = None, stale_seconds: int = 30,
                  project_id: str | None = None):
         if status_dir is None:
             status_dir = Path.home() / ".watchingai"
@@ -39,19 +41,20 @@ class StatusReader:
         except (json.JSONDecodeError, OSError):
             return IDLE, None
 
+        state = data.get("status", "idle")
         timestamp_str = data.get("timestamp", "")
         try:
             ts = datetime.fromisoformat(timestamp_str)
             if ts.tzinfo is None:
                 ts = ts.replace(tzinfo=timezone.utc)
             now = datetime.now(timezone.utc)
-            if (now - ts).total_seconds() > self._stale_seconds:
+            if state not in self.ACTIVE_STATES and (now - ts).total_seconds() > self._stale_seconds:
                 return IDLE, ts
         except ValueError:
             return IDLE, None
 
         status = Status(
-            state=data.get("status", "idle"),
+            state=state,
             detail=data.get("detail", ""),
             elapsed_seconds=data.get("elapsed_seconds", 0),
         )
