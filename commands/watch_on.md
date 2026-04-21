@@ -1,6 +1,6 @@
 아무 말 없이 조용히 백그라운드로 실행해. 설명이나 확인 메시지 없이 "🐱 ON" 한 줄만 출력해.
 
-아래 bash ���령어를 그대로 실행:
+아래 bash 명령어를 그대로 실행:
 ```bash
 if command -v md5sum >/dev/null 2>&1; then
     PROJECT_ID=$(echo "$PWD" | md5sum | cut -c1-8)
@@ -16,7 +16,11 @@ if [ -f "$PID_FILE" ]; then
     fi
     rm -f "$PID_FILE"
 fi
-PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" nohup python3 -m watchingai --project-id "$PROJECT_ID" >/dev/null 2>&1 &
+case "$(uname -s)" in
+    Darwin*) PYTHON_CMD=python3 ;;
+    *)       PYTHON_CMD=python ;;
+esac
+PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" nohup $PYTHON_CMD -m watchingai --project-id "$PROJECT_ID" >/dev/null 2>&1 &
 disown
 sleep 1
 echo "🐱 ON"
