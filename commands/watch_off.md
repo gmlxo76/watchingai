@@ -9,7 +9,11 @@ else
 fi
 PID_FILE="$HOME/.watchingai/pid_${PROJECT_ID}.txt"
 if [ -f "$PID_FILE" ]; then
-    kill $(cat "$PID_FILE") 2>/dev/null
+    PID=$(cat "$PID_FILE")
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*) taskkill //PID "$PID" //F >/dev/null 2>&1 ;;
+        *) kill "$PID" 2>/dev/null ;;
+    esac
     rm -f "$PID_FILE"
 fi
 echo "🐱 OFF"

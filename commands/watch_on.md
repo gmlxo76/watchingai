@@ -17,11 +17,14 @@ if [ -f "$PID_FILE" ]; then
     rm -f "$PID_FILE"
 fi
 case "$(uname -s)" in
-    Darwin*) PYTHON_CMD=python3 ;;
-    *)       PYTHON_CMD=python ;;
+    Darwin*)
+        PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" nohup python3 -m watchingai --project-id "$PROJECT_ID" >/dev/null 2>&1 &
+        disown
+        ;;
+    *)
+        PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" python "${CLAUDE_PLUGIN_ROOT}/bin/launch.py" "$PROJECT_ID"
+        ;;
 esac
-PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" nohup $PYTHON_CMD -m watchingai --project-id "$PROJECT_ID" >/dev/null 2>&1 &
-disown
 sleep 1
 echo "🐱 ON"
 ```

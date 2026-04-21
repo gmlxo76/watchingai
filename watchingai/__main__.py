@@ -136,7 +136,7 @@ class WatchingAIApp:
     def _update_tooltip(self, status: Status) -> None:
         label = STATE_LABELS.get(status.state, status.state)
         if status.detail:
-            text = f"{label} — {status.detail} ({status.elapsed_seconds}초)"
+            text = f"{label} — {status.detail}"
         else:
             text = label
         self._widget.set_tooltip_text(text)
