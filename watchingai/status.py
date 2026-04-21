@@ -22,7 +22,7 @@ IDLE = Status(state="idle", detail="", elapsed_seconds=0)
 
 
 class StatusReader:
-    def __init__(self, status_dir: Path | None = None, stale_seconds: int = 30,
+    def __init__(self, status_dir: Path | None = None, stale_seconds: int = 120,
                  project_id: str | None = None):
         if status_dir is None:
             status_dir = Path.home() / ".watchingai"
