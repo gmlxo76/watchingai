@@ -40,7 +40,15 @@ class FramePickerDialog(QDialog):
         mid = QHBoxLayout()
 
         left_layout = QVBoxLayout()
-        left_layout.addWidget(QLabel("사용 가능한 프레임:"))
+        left_header = QHBoxLayout()
+        left_header.addWidget(QLabel("사용 가능한 프레임:"))
+        import_btn = QPushButton("📁 추가")
+        import_btn.clicked.connect(self._import_images)
+        left_header.addWidget(import_btn)
+        delete_btn = QPushButton("🗑 삭제")
+        delete_btn.clicked.connect(self._delete_image)
+        left_header.addWidget(delete_btn)
+        left_layout.addLayout(left_header)
         self._available_list = QListWidget()
         self._available_list.setIconSize(self._available_list.iconSize().__class__(64, 64))
         left_layout.addWidget(self._available_list)
@@ -139,6 +147,32 @@ class FramePickerDialog(QDialog):
                 if p.exists():
                     return p
         return None
+
+    def _delete_image(self) -> None:
+        item = self._available_list.currentItem()
+        if not item:
+            return
+        name = item.data(Qt.ItemDataRole.UserRole)
+        path = self._frames_dir / name
+        if path.exists():
+            path.unlink()
+            self._load_available_frames()
+
+    def _import_images(self) -> None:
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "이미지 선택", "",
+            "이미지 파일 (*.png *.jpg *.bmp *.gif);;모든 파일 (*.*)",
+        )
+        if not files:
+            return
+        import shutil
+        self._frames_dir.mkdir(parents=True, exist_ok=True)
+        for f in files:
+            src = Path(f)
+            dst = self._frames_dir / src.name
+            if not dst.exists():
+                shutil.copy2(str(src), str(dst))
+        self._load_available_frames()
 
     def _add_frame(self) -> None:
         item = self._available_list.currentItem()
