@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 DEFAULT_ANIMATIONS = {
-    "idle": {"row": 9, "columns": [1, 2, 3, 4]},
-    "thinking": {"row": 3, "columns": [1, 2, 3, 4]},
-    "working": {"row": 4, "columns": [1, 2, 3, 4]},
-    "done": {"row": 5, "columns": [1, 2, 3, 4]},
-    "error": {"row": 7, "columns": [1, 2, 3, 4]},
+    "idle": ["frame_29.png", "frame_30.png", "frame_31.png", "frame_32.png"],
+    "thinking": ["frame_09.png", "frame_10.png", "frame_11.png", "frame_12.png"],
+    "working": ["frame_13.png", "frame_14.png", "frame_15.png", "frame_16.png"],
+    "done": ["frame_17.png", "frame_18.png", "frame_19.png", "frame_20.png"],
+    "error": ["frame_25.png", "frame_26.png", "frame_27.png", "frame_28.png"],
 }
 
 DEFAULT_CONFIG = {
@@ -14,12 +14,7 @@ DEFAULT_CONFIG = {
         "preset": "bottom-right",
         "custom": None,
     },
-    "sprite": {
-        "sheet": "default_sprite.png",
-        "rows": 9,
-        "cols": 4,
-        "animations": DEFAULT_ANIMATIONS,
-    },
+    "animations": DEFAULT_ANIMATIONS,
     "size": 128,
     "poll_interval_ms": 1500,
 }
@@ -72,24 +67,8 @@ class Config:
         self._data["position"]["custom"] = list(value) if value else None
 
     @property
-    def sprite_sheet(self) -> str:
-        return self._data["sprite"]["sheet"]
-
-    @sprite_sheet.setter
-    def sprite_sheet(self, value: str) -> None:
-        self._data["sprite"]["sheet"] = value
-
-    @property
-    def sprite_rows(self) -> int:
-        return self._data["sprite"].get("rows", 0)
-
-    @property
-    def sprite_cols(self) -> int:
-        return self._data["sprite"].get("cols", 0)
-
-    @property
     def animations(self) -> dict:
-        return self._data["sprite"]["animations"]
+        return self._data["animations"]
 
     @property
     def size(self) -> int:
@@ -106,3 +85,7 @@ class Config:
     @property
     def config_dir(self) -> Path:
         return self._config_dir
+
+    @property
+    def frames_dir(self) -> Path:
+        return self._config_dir / "frames"

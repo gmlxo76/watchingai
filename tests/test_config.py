@@ -5,16 +5,13 @@ def test_default_config_created(tmp_path):
     from watchingai.config import Config
     config = Config(config_dir=tmp_path)
     assert config.position_preset == "bottom-right"
-    assert config.sprite_sheet == "default_sprite.png"
-    assert config.sprite_rows == 9
-    assert config.sprite_cols == 4
     assert config.size == 128
     assert config.poll_interval_ms == 1500
-    assert "idle" in config.animations
-    assert "working" in config.animations
-    assert "thinking" in config.animations
-    assert "done" in config.animations
-    assert "error" in config.animations
+    assert isinstance(config.animations["idle"], list)
+    assert isinstance(config.animations["working"], list)
+    assert isinstance(config.animations["thinking"], list)
+    assert isinstance(config.animations["done"], list)
+    assert isinstance(config.animations["error"], list)
 
 
 def test_config_saves_and_loads(tmp_path):
@@ -39,15 +36,14 @@ def test_config_custom_position(tmp_path):
     assert config2.custom_position == (100, 200)
 
 
-def test_config_animation_mapping(tmp_path):
+def test_config_animation_frame_list(tmp_path):
     from watchingai.config import Config
     config = Config(config_dir=tmp_path)
-    config.animations["idle"] = {"row": 9, "columns": [1, 2, 3, 4]}
+    config.animations["idle"] = ["frame_01.png", "frame_02.png"]
     config.save()
 
     config2 = Config(config_dir=tmp_path)
-    assert config2.animations["idle"]["row"] == 9
-    assert config2.animations["idle"]["columns"] == [1, 2, 3, 4]
+    assert config2.animations["idle"] == ["frame_01.png", "frame_02.png"]
 
 
 def test_config_corrupt_file_resets_to_default(tmp_path):
@@ -57,3 +53,9 @@ def test_config_corrupt_file_resets_to_default(tmp_path):
     from watchingai.config import Config
     config = Config(config_dir=tmp_path)
     assert config.position_preset == "bottom-right"
+
+
+def test_frames_dir(tmp_path):
+    from watchingai.config import Config
+    config = Config(config_dir=tmp_path)
+    assert config.frames_dir == tmp_path / "frames"

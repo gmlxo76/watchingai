@@ -7,7 +7,7 @@ from PyQt6.QtGui import QPixmap
 
 from watchingai.config import Config
 from watchingai.status import StatusReader, Status, IDLE
-from watchingai.sprite import SpriteSheet
+from watchingai.sprite import FrameLoader
 from watchingai.widget import SpriteWidget
 from watchingai.tray import TrayIcon
 
@@ -25,16 +25,22 @@ class WatchingAIApp:
     def __init__(self):
         self._config = Config()
         self._status_reader = StatusReader(status_dir=self._config.config_dir)
-        self._sprite_sheet = self._load_sprite_sheet()
+        self._assets_dir = Path(__file__).parent.parent / "assets"
+        self._frame_loader = FrameLoader(
+            frames_dir=self._config.frames_dir,
+            assets_dir=self._assets_dir,
+        )
         self._widget = SpriteWidget(size=self._config.size)
         self._tray = TrayIcon(self._config)
         self._current_status = IDLE
         self._frame_index = 0
         self._current_frames: list[QPixmap] = []
 
+        self._config.frames_dir.mkdir(parents=True, exist_ok=True)
+
         self._tray.position_changed.connect(self._on_position_changed)
         self._tray.size_changed.connect(self._on_size_changed)
-        self._tray.sprite_changed.connect(self._on_sprite_changed)
+        self._tray.frames_changed.connect(self._on_frames_changed)
         self._tray.quit_requested.connect(self._on_quit)
 
         self._status_timer = QTimer()
@@ -49,19 +55,6 @@ class WatchingAIApp:
         self._update_animation(IDLE)
         self._widget.show()
         self._tray.show()
-
-    def _load_sprite_sheet(self) -> SpriteSheet:
-        sheet_path = self._config.sprite_sheet
-        path = Path(sheet_path)
-        if not path.is_absolute():
-            candidate = self._config.config_dir / sheet_path
-            if candidate.exists():
-                path = candidate
-            else:
-                path = Path(__file__).parent.parent / "assets" / sheet_path
-        return SpriteSheet(path,
-                           rows=self._config.sprite_rows,
-                           cols=self._config.sprite_cols)
 
     def _apply_position(self) -> None:
         custom = self._config.custom_position
@@ -79,13 +72,10 @@ class WatchingAIApp:
 
     def _update_animation(self, status: Status) -> None:
         state = status.state
-        anim_config = self._config.animations.get(state)
-        if anim_config is None:
-            anim_config = self._config.animations.get("idle", {"row": 1, "columns": [1]})
-        self._current_frames = self._sprite_sheet.get_animation_frames(
-            row=anim_config["row"],
-            columns=anim_config["columns"],
-        )
+        frame_files = self._config.animations.get(state)
+        if not frame_files:
+            frame_files = self._config.animations.get("idle", [])
+        self._current_frames = self._frame_loader.load_frames(frame_files)
         self._frame_index = 0
         if self._current_frames:
             self._widget.update_sprite(self._current_frames[0])
@@ -114,8 +104,7 @@ class WatchingAIApp:
         self._update_animation(self._current_status)
         self._widget.show()
 
-    def _on_sprite_changed(self, path: str) -> None:
-        self._sprite_sheet = SpriteSheet(Path(path))
+    def _on_frames_changed(self) -> None:
         self._update_animation(self._current_status)
 
     def _on_quit(self) -> None:
