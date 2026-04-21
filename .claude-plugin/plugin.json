@@ -1,0 +1,11 @@
+{
+  "name": "watchingai",
+  "description": "Desktop sprite widget that shows Claude Code's working status",
+  "version": "0.1.0",
+  "author": {
+    "name": "WatchingAI"
+  },
+  "homepage": "https://github.com/watchingai/watchingai",
+  "license": "MIT",
+  "setup": "setup.sh"
+}
