@@ -9,8 +9,8 @@ else
 fi
 STATUS_FILE="$WATCHINGAI_DIR/status_${PROJECT_ID}.json"
 SESSION_LOG="$WATCHINGAI_DIR/session_log_${PROJECT_ID}.txt"
+LOCK_FILE="$WATCHINGAI_DIR/lock_${PROJECT_ID}"
 
-# 현재 프로젝트 경로 기록 (앱에서 참조)
 echo "$PWD" > "$WATCHINGAI_DIR/project_${PROJECT_ID}.path"
 
 INPUT=$(cat)
@@ -54,15 +54,12 @@ build_summary() {
 case "$HOOK_EVENT" in
     SessionStart)
         rm -f "$SESSION_LOG"
+        rm -f "$LOCK_FILE"
         write_status "idle" ""
-        ;;
-    Stop)
-        SUMMARY=$(build_summary)
-        rm -f "$SESSION_LOG"
-        write_status "idle" "[세션종료] $SUMMARY"
         ;;
     SessionEnd)
         rm -f "$SESSION_LOG"
+        rm -f "$LOCK_FILE"
         PID_FILE="$WATCHINGAI_DIR/pid_${PROJECT_ID}.txt"
         if [ -f "$PID_FILE" ]; then
             PID=$(cat "$PID_FILE")
@@ -75,29 +72,42 @@ case "$HOOK_EVENT" in
         write_status "idle" ""
         ;;
     UserPromptSubmit)
+        rm -f "$LOCK_FILE"
         write_status "thinking" "요청 처리 중..."
         ;;
-    PreToolUse)
-        case "$TOOL_NAME" in
-            Edit|Write)
-                log_action "edit"
-                write_status "working" "파일 편집 중" ;;
-            Bash|PowerShell)
-                log_action "cmd"
-                write_status "working" "명령 실행 중" ;;
-            Read|Glob|Grep)
-                log_action "read"
-                write_status "working" "파일 탐색 중" ;;
-            *)
-                write_status "working" "$TOOL_NAME 실행 중" ;;
+    Stop)
+        SUMMARY=$(build_summary)
+        rm -f "$SESSION_LOG"
+        write_status "idle" "[세션종료] $SUMMARY"
+        ;;
+    *)
+        if [ -f "$LOCK_FILE" ]; then
+            exit 0
+        fi
+        case "$HOOK_EVENT" in
+            PreToolUse)
+                case "$TOOL_NAME" in
+                    Edit|Write)
+                        log_action "edit"
+                        write_status "working" "파일 편집 중" ;;
+                    Bash|PowerShell)
+                        log_action "cmd"
+                        write_status "working" "명령 실행 중" ;;
+                    Read|Glob|Grep)
+                        log_action "read"
+                        write_status "working" "파일 탐색 중" ;;
+                    *)
+                        write_status "working" "$TOOL_NAME 실행 중" ;;
+                esac
+                ;;
+            PostToolUse)
+                write_status "working" "작업 중"
+                ;;
+            PostToolUseFailure)
+                log_action "error"
+                write_status "error" "$TOOL_NAME 실패"
+                ;;
         esac
-        ;;
-    PostToolUse)
-        write_status "done" "완료"
-        ;;
-    PostToolUseFailure)
-        log_action "error"
-        write_status "error" "$TOOL_NAME 실패"
         ;;
 esac
 

@@ -22,7 +22,7 @@ IDLE = Status(state="idle", detail="", elapsed_seconds=0)
 
 
 class StatusReader:
-    ACTIVE_STATES = {"thinking", "working", "done"}
+    ACTIVE_STATES = {"thinking", "working"}
 
     def __init__(self, status_dir: Path | None = None, stale_seconds: int = 30,
                  project_id: str | None = None):

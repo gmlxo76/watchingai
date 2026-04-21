@@ -25,6 +25,7 @@ case "$(uname -s)" in
         PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" python "${CLAUDE_PLUGIN_ROOT}/bin/launch.py" "$PROJECT_ID"
         ;;
 esac
+touch "$HOME/.watchingai/lock_${PROJECT_ID}"
 sleep 1
 echo "🐱 ON"
 ```

@@ -53,8 +53,6 @@ class WatchingAIApp:
         self._tray.test_state_changed.connect(self._on_test_state)
         self._tray.quit_requested.connect(self._on_quit)
 
-        self._done_since = None
-
         self._status_timer = QTimer()
         self._status_timer.timeout.connect(self._poll_status)
         self._status_timer.start(self._config.poll_interval_ms)
@@ -63,11 +61,27 @@ class WatchingAIApp:
         self._anim_timer.timeout.connect(self._next_frame)
         self._anim_timer.start(200)
 
+        self._force_idle()
         self._apply_position()
         self._update_animation(IDLE)
         self._widget.show()
         self._tray.show()
         self._write_pid()
+
+    def _force_idle(self) -> None:
+        if self._project_id:
+            status_file = self._config.config_dir / f"status_{self._project_id}.json"
+        else:
+            status_file = self._config.config_dir / "status.json"
+        data = {
+            "status": "idle",
+            "detail": "",
+            "elapsed_seconds": 0,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        status_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(status_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
 
     def _read_project_name(self) -> str:
         if not self._project_id:
@@ -102,21 +116,6 @@ class WatchingAIApp:
 
     def _poll_status(self) -> None:
         status = self._status_reader.read()
-
-        if status.state == "done":
-            if self._done_since is None:
-                self._done_since = datetime.now(timezone.utc)
-            elapsed = (datetime.now(timezone.utc) - self._done_since).total_seconds()
-            if elapsed >= 5:
-                self._done_since = None
-                idle_status = Status(state="idle", detail=status.detail, elapsed_seconds=0)
-                self._current_status = idle_status
-                self._update_animation(idle_status)
-                self._update_tooltip(idle_status)
-                return
-        else:
-            self._done_since = None
-
         if status != self._current_status:
             self._current_status = status
             self._update_animation(status)

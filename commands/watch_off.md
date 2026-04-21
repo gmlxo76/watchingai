@@ -16,5 +16,10 @@ if [ -f "$PID_FILE" ]; then
     esac
     rm -f "$PID_FILE"
 fi
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S")
+cat > "$HOME/.watchingai/status_${PROJECT_ID}.json" << EOF
+{"status":"idle","detail":"","timestamp":"$TIMESTAMP","elapsed_seconds":0}
+EOF
+touch "$HOME/.watchingai/lock_${PROJECT_ID}"
 echo "🐱 OFF"
 ```
