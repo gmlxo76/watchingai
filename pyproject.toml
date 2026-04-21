@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "watchingai"
+version = "0.1.0"
+description = "Desktop sprite widget that shows Claude Code's working status"
+requires-python = ">=3.9"
+dependencies = [
+    "PyQt6>=6.5.0",
+]
+
+[project.scripts]
+watchingai = "watchingai.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["watchingai*"]
+
+[tool.setuptools.package-data]
+watchingai = ["../assets/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
