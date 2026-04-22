@@ -14,8 +14,8 @@ fi
 
 if [ -n "$PYTHON_CMD" ]; then
     echo "Python found: $PYTHON_CMD"
-    echo "Installing dependencies..."
-    "$PYTHON_CMD" -m pip install PyQt6>=6.5.0
+    echo "Installing watchingai..."
+    "$PYTHON_CMD" -m pip install --upgrade watchingai
 else
     echo "Error: Python not found. Please install Python 3.9+ first."
     exit 1
