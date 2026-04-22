@@ -22,7 +22,12 @@ case "$(uname -s)" in
         disown
         ;;
     *)
-        PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" python "${CLAUDE_PLUGIN_ROOT}/bin/launch.py" "$PROJECT_ID"
+        PY_CMD=""
+        if command -v python3 >/dev/null 2>&1; then PY_CMD="python3"
+        elif command -v python >/dev/null 2>&1; then PY_CMD="python"
+        elif command -v py >/dev/null 2>&1; then PY_CMD="py"
+        fi
+        PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" "$PY_CMD" "${CLAUDE_PLUGIN_ROOT}/bin/launch.py" "$PROJECT_ID"
         ;;
 esac
 touch "$HOME/.watchingai/lock_${PROJECT_ID}"
