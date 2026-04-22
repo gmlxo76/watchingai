@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 DEFAULT_ANIMATIONS = {
-    "idle": ["frame_01.png", "frame_02.png", "frame_03.png", "frame_04.png"],
-    "thinking": ["frame_06.png", "frame_07.png", "frame_08.png", "frame_09.png", "frame_10.png"],
-    "working": ["frame_11.png", "frame_14.png"],
-    "done": ["frame_01.png", "frame_02.png", "frame_03.png", "frame_04.png", "frame_05.png"],
-    "error": ["frame_01.png", "frame_02.png", "frame_03.png", "frame_04.png", "frame_05.png"],
+    "idle": ["idle.gif"],
+    "thinking": ["thinking.gif"],
+    "working": ["working.gif"],
+    "done": ["done.gif"],
+    "error": ["fail.gif"],
 }
 
 DEFAULT_CONFIG = {
