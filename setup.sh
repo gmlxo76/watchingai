@@ -4,10 +4,15 @@ set -euo pipefail
 echo "=== WatchingAI Setup ==="
 
 find_python() {
-    if command -v python3 &> /dev/null; then echo "python3"
-    elif command -v python &> /dev/null; then echo "python"
-    elif command -v py &> /dev/null; then echo "py"
-    fi
+    case "$(uname -s)" in
+        Darwin*)
+            python3 --version >/dev/null 2>&1 && echo "python3" && return
+            ;;
+        *)
+            python --version >/dev/null 2>&1 && echo "python" && return
+            py --version >/dev/null 2>&1 && echo "py" && return
+            ;;
+    esac
 }
 
 PYTHON_CMD=$(find_python)
@@ -18,6 +23,10 @@ if [ -z "$PYTHON_CMD" ]; then
         MINGW*|MSYS*|CYGWIN*)
             if command -v winget &> /dev/null; then
                 winget install Python.Python.3.11 --accept-package-agreements --accept-source-agreements
+                WIN_USER=$(cmd.exe //C "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+                for P in "/c/Users/$WIN_USER/AppData/Local/Programs/Python/Python311" "/c/Program Files/Python311"; do
+                    [ -d "$P" ] && export PATH="$PATH:$P:$P/Scripts"
+                done
             else
                 echo "Error: winget not found. Please install Python 3.9+ manually: https://www.python.org/downloads/"
                 exit 1
