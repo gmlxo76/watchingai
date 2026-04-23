@@ -8,7 +8,18 @@ from pathlib import Path
 WATCHINGAI_DIR = Path.home() / ".watchingai"
 WATCHINGAI_DIR.mkdir(parents=True, exist_ok=True)
 
-project_id = sys.argv[1] if len(sys.argv) > 1 else hashlib.md5(os.getcwd().encode()).hexdigest()[:8]
+def get_project_id():
+    if platform.system() == "Windows":
+        result = subprocess.run(
+            ["bash", "-c", "echo $PWD"],
+            capture_output=True, text=True,
+        )
+        cwd = result.stdout.strip() + "\n"
+    else:
+        cwd = os.getcwd() + "\n"
+    return hashlib.md5(cwd.encode()).hexdigest()[:8]
+
+project_id = sys.argv[1] if len(sys.argv) > 1 else get_project_id()
 
 pid_file = WATCHINGAI_DIR / f"pid_{project_id}.txt"
 if pid_file.exists():

@@ -38,10 +38,12 @@ build_summary() {
         echo "작업 완료"
         return
     fi
-    EDIT_COUNT=$(grep -c "edit" "$SESSION_LOG" 2>/dev/null || echo 0)
-    CMD_COUNT=$(grep -c "cmd" "$SESSION_LOG" 2>/dev/null || echo 0)
-    READ_COUNT=$(grep -c "read" "$SESSION_LOG" 2>/dev/null || echo 0)
-    ERR_COUNT=$(grep -c "error" "$SESSION_LOG" 2>/dev/null || echo 0)
+    EDIT_COUNT=$(grep -c "edit" "$SESSION_LOG" 2>/dev/null || true)
+    CMD_COUNT=$(grep -c "cmd" "$SESSION_LOG" 2>/dev/null || true)
+    READ_COUNT=$(grep -c "read" "$SESSION_LOG" 2>/dev/null || true)
+    ERR_COUNT=$(grep -c "error" "$SESSION_LOG" 2>/dev/null || true)
+    EDIT_COUNT=${EDIT_COUNT:-0}; CMD_COUNT=${CMD_COUNT:-0}
+    READ_COUNT=${READ_COUNT:-0}; ERR_COUNT=${ERR_COUNT:-0}
     PARTS=""
     [ "$EDIT_COUNT" -gt 0 ] && PARTS="파일 ${EDIT_COUNT}개 편집"
     [ "$CMD_COUNT" -gt 0 ] && PARTS="${PARTS:+$PARTS, }명령 ${CMD_COUNT}회 실행"
