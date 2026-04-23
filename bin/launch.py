@@ -14,5 +14,7 @@ kwargs = dict(
 )
 if platform.system() == "Windows":
     kwargs["creationflags"] = 0x00000008
+else:
+    kwargs["start_new_session"] = True
 
 subprocess.Popen(args, **kwargs)

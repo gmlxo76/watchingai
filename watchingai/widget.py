@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PyQt6.QtCore import Qt, QPoint, QTimer, QSize
 from PyQt6.QtGui import QCursor, QPixmap, QGuiApplication, QFont, QMovie
 
+_FONT_FAMILY = "Helvetica Neue" if sys.platform == "darwin" else "맑은 고딕"
+
 
 POSITION_PRESETS = {
     "top-left": (0.02, 0.02),
@@ -25,6 +27,8 @@ class TooltipWindow(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        if sys.platform == "darwin":
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
 
         self._label = QLabel(self)
         self._label.setStyleSheet(
@@ -34,7 +38,7 @@ class TooltipWindow(QWidget):
             "border-radius: 6px;"
             "font-size: 12px;"
         )
-        self._label.setFont(QFont("맑은 고딕", 9))
+        self._label.setFont(QFont(_FONT_FAMILY, 9))
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -70,6 +74,8 @@ class BubbleWindow(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        if sys.platform == "darwin":
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
 
         self._label = QLabel(self)
         self._label.setStyleSheet(
@@ -80,7 +86,7 @@ class BubbleWindow(QWidget):
             "border: 2px solid #ccc;"
             "font-size: 12px;"
         )
-        self._label.setFont(QFont("맑은 고딕", 9))
+        self._label.setFont(QFont(_FONT_FAMILY, 9))
         self._label.setWordWrap(True)
         self._label.setMaximumWidth(250)
 

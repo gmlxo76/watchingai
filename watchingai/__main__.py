@@ -5,6 +5,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+if sys.platform == "darwin":
+    os.environ.setdefault("QT_MAC_WANTS_LAYER", "1")
+
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap
@@ -201,9 +204,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-id", default=None)
     args, remaining = parser.parse_known_args()
-
-    if sys.platform == "darwin":
-        os.environ.setdefault("QT_MAC_WANTS_LAYER", "1")
 
     app = QApplication(remaining)
     app.setQuitOnLastWindowClosed(False)

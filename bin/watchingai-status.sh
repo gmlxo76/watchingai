@@ -6,9 +6,13 @@ STATUS_FILE="$WATCHINGAI_DIR/status.json"
 mkdir -p "$WATCHINGAI_DIR"
 
 HOOK_INPUT=$(cat)
-HOOK_EVENT=$(echo "$HOOK_INPUT" | jq -r '.hook_event_name // empty')
-TOOL_NAME=$(echo "$HOOK_INPUT" | jq -r '.tool_name // empty')
-TOOL_INPUT=$(echo "$HOOK_INPUT" | jq -r '.tool_input // empty')
+
+get_val() {
+    echo "$HOOK_INPUT" | sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" | head -1
+}
+
+HOOK_EVENT=$(get_val "hook_event_name")
+TOOL_NAME=$(get_val "tool_name")
 
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S")
 
@@ -35,11 +39,13 @@ case "$HOOK_EVENT" in
     "PreToolUse")
         case "$TOOL_NAME" in
             "Edit"|"Write")
-                FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.file_path // "unknown"')
+                FILE_PATH=$(get_val "file_path")
+                : "${FILE_PATH:=unknown}"
                 write_status "working" "$FILE_PATH 편집 중"
                 ;;
             "Bash"|"PowerShell")
-                COMMAND=$(echo "$TOOL_INPUT" | jq -r '.command // ""' | head -c 50)
+                COMMAND=$(get_val "command")
+                COMMAND=$(echo "$COMMAND" | head -c 50)
                 write_status "working" "명령 실행: $COMMAND"
                 ;;
             "Read"|"Glob"|"Grep")

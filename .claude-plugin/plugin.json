@@ -1,7 +1,7 @@
 {
   "name": "watchingai",
   "description": "Desktop sprite widget that shows Claude Code's working status",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "author": {
     "name": "WatchingAI"
   },
