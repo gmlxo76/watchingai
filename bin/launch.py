@@ -1,12 +1,40 @@
+import hashlib
+import os
+import platform
 import subprocess
 import sys
-import platform
+from pathlib import Path
 
-project_id = sys.argv[1] if len(sys.argv) > 1 else None
-args = [sys.executable, "-m", "watchingai"]
-if project_id:
-    args += ["--project-id", project_id]
+WATCHINGAI_DIR = Path.home() / ".watchingai"
+WATCHINGAI_DIR.mkdir(parents=True, exist_ok=True)
 
+project_id = sys.argv[1] if len(sys.argv) > 1 else hashlib.md5(os.getcwd().encode()).hexdigest()[:8]
+
+pid_file = WATCHINGAI_DIR / f"pid_{project_id}.txt"
+if pid_file.exists():
+    old_pid = pid_file.read_text().strip()
+    try:
+        if platform.system() == "Windows":
+            result = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {old_pid}"],
+                capture_output=True, text=True,
+            )
+            if old_pid in result.stdout:
+                sys.exit(0)
+        else:
+            os.kill(int(old_pid), 0)
+            sys.exit(0)
+    except (OSError, ValueError):
+        pid_file.unlink(missing_ok=True)
+
+try:
+    __import__("watchingai")
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "watchingai"])
+
+(WATCHINGAI_DIR / f"project_{project_id}.path").write_text(os.getcwd(), encoding="utf-8")
+
+args = [sys.executable, "-m", "watchingai", "--project-id", project_id]
 kwargs = dict(
     close_fds=True,
     stdout=subprocess.DEVNULL,
@@ -18,3 +46,6 @@ else:
     kwargs["start_new_session"] = True
 
 subprocess.Popen(args, **kwargs)
+
+lock_file = WATCHINGAI_DIR / f"lock_{project_id}"
+lock_file.touch()

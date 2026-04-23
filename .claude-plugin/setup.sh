@@ -3,17 +3,9 @@ set -euo pipefail
 
 echo "=== WatchingAI Setup ==="
 
-find_python() {
-    case "$(uname -s)" in
-        Darwin*)
-            python3 --version >/dev/null 2>&1 && echo "python3" && return
-            ;;
-        *)
-            python --version >/dev/null 2>&1 && echo "python" && return
-            py --version >/dev/null 2>&1 && echo "py" && return
-            ;;
-    esac
-}
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
+source "$PLUGIN_ROOT/bin/find_python.sh"
 
 PYTHON_CMD=$(find_python)
 
@@ -23,10 +15,7 @@ if [ -z "$PYTHON_CMD" ]; then
         MINGW*|MSYS*|CYGWIN*)
             if command -v winget &> /dev/null; then
                 winget install Python.Python.3.11 --accept-package-agreements --accept-source-agreements
-                WIN_USER=$(cmd.exe //C "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-                for P in "/c/Users/$WIN_USER/AppData/Local/Programs/Python/Python311" "/c/Program Files/Python311"; do
-                    [ -d "$P" ] && export PATH="$PATH:$P:$P/Scripts"
-                done
+                PYTHON_CMD=$(find_python)
             else
                 echo "Error: winget not found. Please install Python 3.9+ manually: https://www.python.org/downloads/"
                 exit 1
@@ -35,6 +24,7 @@ if [ -z "$PYTHON_CMD" ]; then
         Darwin*)
             if command -v brew &> /dev/null; then
                 brew install python3
+                PYTHON_CMD=$(find_python)
             else
                 echo "Error: brew not found. Please install Python 3.9+ manually: https://www.python.org/downloads/"
                 exit 1
@@ -49,9 +39,9 @@ if [ -z "$PYTHON_CMD" ]; then
                 echo "Error: Please install Python 3.9+ manually: https://www.python.org/downloads/"
                 exit 1
             fi
+            PYTHON_CMD=$(find_python)
             ;;
     esac
-    PYTHON_CMD=$(find_python)
     if [ -z "$PYTHON_CMD" ]; then
         echo "Error: Python installation failed. Please install Python 3.9+ manually."
         exit 1
