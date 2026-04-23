@@ -1,7 +1,7 @@
 {
   "name": "watchingai",
   "description": "Desktop sprite widget that shows Claude Code's working status",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "author": {
     "name": "WatchingAI"
   },
@@ -14,6 +14,66 @@
           {
             "type": "command",
             "command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/version.txt\" \"${CLAUDE_PLUGIN_DATA}/version.txt\" >/dev/null 2>&1 || (bash \"${CLAUDE_PLUGIN_ROOT}/setup.sh\" && cp \"${CLAUDE_PLUGIN_ROOT}/version.txt\" \"${CLAUDE_PLUGIN_DATA}/version.txt\") || rm -f \"${CLAUDE_PLUGIN_DATA}/version.txt\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/watchingai-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/watchingai-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/watchingai-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/watchingai-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/watchingai-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/watchingai-hook.sh\""
           }
         ]
       }
