@@ -1,7 +1,7 @@
 {
   "name": "watchingai",
   "description": "Desktop sprite widget that shows Claude Code's working status",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "author": {
     "name": "WatchingAI"
   },
@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/version.txt\" \"${CLAUDE_PLUGIN_DATA}/version.txt\" >/dev/null 2>&1 || (bash \"${CLAUDE_PLUGIN_ROOT}/setup.sh\" && cp \"${CLAUDE_PLUGIN_ROOT}/version.txt\" \"${CLAUDE_PLUGIN_DATA}/version.txt\") || rm -f \"${CLAUDE_PLUGIN_DATA}/version.txt\""
+            "command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/version.txt\" \"${CLAUDE_PLUGIN_DATA}/version.txt\" >/dev/null 2>&1 || (bash \"${CLAUDE_PLUGIN_ROOT}/setup.sh\" && mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && cp \"${CLAUDE_PLUGIN_ROOT}/version.txt\" \"${CLAUDE_PLUGIN_DATA}/version.txt\") || rm -f \"${CLAUDE_PLUGIN_DATA}/version.txt\""
           }
         ]
       }
