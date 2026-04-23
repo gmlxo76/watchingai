@@ -10,9 +10,7 @@ if [ -z "$PY_CMD" ]; then
     exit 1
 fi
 
-if ! "$PY_CMD" -c "import watchingai" >/dev/null 2>&1; then
-    "$PY_CMD" -m pip install --upgrade watchingai
-fi
+"$PY_CMD" -m pip install --upgrade watchingai >/dev/null 2>&1
 
 "$PY_CMD" "${CLAUDE_PLUGIN_ROOT}/bin/launch.py"
 echo "🐱 ON"

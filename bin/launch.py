@@ -38,10 +38,10 @@ if pid_file.exists():
     except (OSError, ValueError):
         pid_file.unlink(missing_ok=True)
 
-try:
-    __import__("watchingai")
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "watchingai"])
+subprocess.run(
+    [sys.executable, "-m", "pip", "install", "--upgrade", "watchingai"],
+    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+)
 
 (WATCHINGAI_DIR / f"project_{project_id}.path").write_text(os.getcwd(), encoding="utf-8")
 
